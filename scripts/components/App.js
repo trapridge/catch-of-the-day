@@ -1,5 +1,7 @@
 import React from 'react'
 import Rebase from 're-base'          // data persistence with firebase
+import Catalyst from 'react-catalyst' // two way data flow
+import reactMixin from 'react-mixin'  // mixins in ES6
 
 import Header from './app/Header'
 import Fish from './app/Fish'
@@ -20,9 +22,12 @@ export default class App extends React.Component {
   constructor() {
     super()
     this.addFish = this.addFish.bind(this)
+    this.removeFish = this.removeFish.bind(this)
     this.addToOrder = this.addToOrder.bind(this)
+    this.removeFromOrder = this.removeFromOrder.bind(this)
     this.loadSamples = this.loadSamples.bind(this)
     this.renderFish = this.renderFish.bind(this)
+    this.linkState = this.linkState.bind(this)
     this.state = {
       fishes: {},
       order: {} 
@@ -66,8 +71,11 @@ export default class App extends React.Component {
             {Object.keys(this.state.fishes).map(this.renderFish)} 
           </ul>
         </div>
-        <Order fishes={this.state.fishes} order={this.state.order} />
-        <Inventory addFish={this.addFish} loadSamples={this.loadSamples} />
+        <Order removeFromOrder={this.removeFromOrder} 
+          fishes={this.state.fishes} order={this.state.order} />
+        <Inventory addFish={this.addFish} removeFish={this.removeFish} 
+          loadSamples={this.loadSamples} fishes={this.state.fishes} 
+          linkState={this.linkState} />
       </div>
     )
   }
@@ -75,7 +83,7 @@ export default class App extends React.Component {
   renderFish(key) {
     return (
       <Fish addToOrder={this.addToOrder} key={key} index={key} 
-        details={this.state.fishes[key]}/>
+        details={this.state.fishes[key]} />
     )
   }
 
@@ -89,12 +97,28 @@ export default class App extends React.Component {
     })
   }
 
+  removeFish(key) {
+    if (confirm('Are you sure?')) {
+      this.state.fishes[key] = null
+      this.setState({
+        fishes: this.state.fishes
+      })
+    }
+  }
+
   addToOrder(key) {
     this.state.order[key] = this.state.order[key] + 1 || 1
     this.setState({ 
       order: this.state.order 
     })
-  }  
+  }
+
+  removeFromOrder(key) {
+    delete this.state.order[key]
+    this.setState({
+      order: this.state.order
+    })
+  } 
 
   loadSamples() {
     this.setState({
@@ -102,3 +126,5 @@ export default class App extends React.Component {
     }) 
   }
 }
+
+reactMixin.onClass(App, Catalyst.LinkedStateMixin)
