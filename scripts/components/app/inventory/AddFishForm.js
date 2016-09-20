@@ -1,9 +1,11 @@
 import React from 'react'
 
+import Autobind from 'autobind-decorator'
+
+@Autobind
 export default class AddFishForm extends React.Component {
-  constructor() {
-    super()
-    this.createFish = this.createFish.bind(this)
+  static propTypes = {
+    addFish: React.PropTypes.func.isRequired
   }
 
   render() {

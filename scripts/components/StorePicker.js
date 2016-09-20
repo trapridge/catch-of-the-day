@@ -1,13 +1,12 @@
 import React from 'react'
+import Autobind from 'autobind-decorator'
 import { browserHistory } from 'react-router'
 
 import Helpers from '../helpers'
 
+@Autobind
 export default class StorePicker extends React.Component {
-  constructor() {
-    super()
-    this.goToStore = this.goToStore.bind(this)
-  }
+  static propTypes = {}
 
   render() {
     return (

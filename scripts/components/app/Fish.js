@@ -1,11 +1,20 @@
 import React from 'react'
+import Autobind from 'autobind-decorator'
 
 import Helpers from '../../helpers'
 
+@Autobind
 export default class Fish extends React.Component {
-  constructor() {
-    super()
-    this.addToOrder = this.addToOrder.bind(this)
+  static propTypes = {
+    addToOrder: React.PropTypes.func.isRequired,
+    index: React.PropTypes.string.isRequired,
+    details: React.PropTypes.shape({
+      name: React.PropTypes.string.isRequired,
+      price: React.PropTypes.string.isRequired,
+      status: React.PropTypes.string.isRequired,
+      desc: React.PropTypes.string.isRequired,
+      image: React.PropTypes.string.isRequired,
+    })
   }
 
   render() {

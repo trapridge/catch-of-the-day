@@ -1,5 +1,6 @@
 export default class Helpers {
   static formatPrice(cents) {
+    cents = parseInt(cents)
     return ((cents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")) +
       ' €'
   }
@@ -36,5 +37,15 @@ export default class Helpers {
       Helpers.rnd(adjectives),
       Helpers.rnd(nouns)
     ].join('-')
+  }
+
+  static getRebaseConfig() {
+    return {
+      apiKey: 'AIzaSyAP1s9hYKefytL01shHNegEbrB4bO59nJQ',
+      authDomain: 'catch-of-the-day-18f2e.firebaseapp.com',
+      databaseURL: 'https://catch-of-the-day-18f2e.firebaseio.com',
+      storageBucket: 'catch-of-the-day-18f2e.appspot.com',
+      messagingSenderId: '23941976250'
+    }
   }
 }

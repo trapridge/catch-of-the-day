@@ -1,33 +1,20 @@
 import React from 'react'
 import Rebase from 're-base'          // data persistence with firebase
-import Catalyst from 'react-catalyst' // two way data flow
-import reactMixin from 'react-mixin'  // mixins in ES6
+import Autobind from 'autobind-decorator'
 
 import Header from './app/Header'
 import Fish from './app/Fish'
 import Order from './app/Order'
 import Inventory from './app/Inventory'
-
 import { samples } from '../sample-fishes'
+import Helpers from '../helpers'
 
-const base = Rebase.createClass({
-  apiKey: 'AIzaSyAP1s9hYKefytL01shHNegEbrB4bO59nJQ',
-  authDomain: 'catch-of-the-day-18f2e.firebaseapp.com',
-  databaseURL: 'https://catch-of-the-day-18f2e.firebaseio.com',
-  storageBucket: 'catch-of-the-day-18f2e.appspot.com',
-  messagingSenderId: '23941976250'
-})
+const base = Rebase.createClass(Helpers.getRebaseConfig())
 
+@Autobind
 export default class App extends React.Component {
   constructor() {
     super()
-    this.addFish = this.addFish.bind(this)
-    this.removeFish = this.removeFish.bind(this)
-    this.addToOrder = this.addToOrder.bind(this)
-    this.removeFromOrder = this.removeFromOrder.bind(this)
-    this.loadSamples = this.loadSamples.bind(this)
-    this.renderFish = this.renderFish.bind(this)
-    this.linkState = this.linkState.bind(this)
     this.state = {
       fishes: {},
       order: {} 
@@ -66,16 +53,22 @@ export default class App extends React.Component {
     return (
       <div className="catch-of-the-day">
         <div className="menu">
-          <Header tagline="whatever"/>
+          <Header tagline="Fancy tagline" />
           <ul className="list-of-fishes">
             {Object.keys(this.state.fishes).map(this.renderFish)} 
           </ul>
         </div>
-        <Order removeFromOrder={this.removeFromOrder} 
-          fishes={this.state.fishes} order={this.state.order} />
-        <Inventory addFish={this.addFish} removeFish={this.removeFish} 
-          loadSamples={this.loadSamples} fishes={this.state.fishes} 
-          linkState={this.linkState} />
+        <Order 
+          removeFromOrder={this.removeFromOrder} 
+          fishes={this.state.fishes} 
+          order={this.state.order} />
+        <Inventory 
+          addFish={this.addFish} 
+          removeFish={this.removeFish} 
+          loadSamples={this.loadSamples} 
+          fishes={this.state.fishes} 
+          updateState={this.updateState}
+          {...this.props} />
       </div>
     )
   }
@@ -125,6 +118,8 @@ export default class App extends React.Component {
       fishes: samples
     }) 
   }
-}
 
-reactMixin.onClass(App, Catalyst.LinkedStateMixin)
+  updateState(props) {
+    this.setState(props)
+  }
+}
