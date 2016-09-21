@@ -26,23 +26,36 @@ export default class Inventory extends React.Component {
     this.state = {
       uid: undefined
     }
-    Firebase.initializeApp(Helpers.getRebaseConfig())
-    this.fireBaseRootRef = Firebase.database().ref()
-    this.provider = new Firebase.auth.GithubAuthProvider()
+    Firebase.initializeApp(Helpers.getFirebaseConfig())
   }
 
   componentWillMount() {
-    const provider = Firebase.auth.GithubAuthProvider
-    const token = localStorage.getItem('token')
+    Firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        const storeRef = 
+          Firebase.database().ref().child(this.props.params.storeId)
+        storeRef.on('value', (snapshot) => {
+          let data = snapshot.val() || {}
 
-    if (token) {
-      const credential = provider.credential(token)
-      if (credential) {
-        Firebase.auth().signInWithCredential(credential)
-          .then(this.authHandler)
-          .catch(error => console.log(error))
+          if (!data.owner) {
+            // Make current user the owner as no owner pre-exists
+            storeRef.set({
+              owner: user.uid
+            })
+          }
+
+          this.setState({ 
+            uid: user.uid,
+            owner: data.owner || user.uid
+          })
+        })
+      } else {
+        this.setState({
+          uid: null
+        })
       }
-    }
+    })
+
   }
 
   render() {
@@ -68,10 +81,12 @@ export default class Inventory extends React.Component {
         <h2>Inventory</h2>
         {logoutButton}
         {Object.keys(this.props.fishes).map(this.renderInventoryItem)}
-        <AddFishForm {...this.props} />
-        {/* loadSamples in App */}
+        <AddFishForm 
+          {...this.props} />
         <button 
-          onClick={this.props.loadSamples}>Load sample fishes</button>
+          onClick={this.props.loadSamples}>
+          Load sample fishes
+          </button>
       </div>
     )      
     
@@ -79,12 +94,24 @@ export default class Inventory extends React.Component {
 
   renderLogin() {
     return (
-      <nav className="login">
+      <nav 
+        className="login">
         <h2>Inventory</h2>
         <p>Sign in to manage your store's inventory</p>
-        <button className="github" 
+        <button 
+          className="github" 
           onClick={this.authenticate.bind(this, 'github')}>
-          Log in with github
+          Log in with Github
+        </button>
+        <button 
+          className="google" 
+          onClick={this.authenticate.bind(this, 'google')}>
+          Log in with Google
+        </button>
+        <button 
+          className="twitter" 
+          onClick={this.authenticate.bind(this, 'twitter')}>
+          Log in with Twitter
         </button>
       </nav>
     )
@@ -133,56 +160,29 @@ export default class Inventory extends React.Component {
 
   onInputChange(key, detail, event) {
     this.props.fishes[key][detail] = event.target.value
-    this.props.updateState({
-      fishes: this.props.fishes
-    })
+    this.props.updateFishesState(this.props.fishes)
   }
   
-  authenticate() {
-    Firebase.auth().signInWithPopup(this.provider)
-      .then(this.authHandler)
+  authenticate(providerName, event) {
+    let provider
+    switch (providerName) {
+      case 'github':
+        provider = new Firebase.auth.GithubAuthProvider()
+        break
+      case 'google':
+        provider = new Firebase.auth.GoogleAuthProvider()
+        break
+      case 'twitter':
+        provider = new Firebase.auth.TwitterAuthProvider()
+        break
+      default:
+        return
+    }
+    Firebase.auth().signInWithPopup(provider)
       .catch(error => console.log(error))
   }
 
-  authHandler(authData) {
-    let uid
-    let token
-
-    // login from button
-    if (authData.credential && authData.user) {
-      uid = authData.user.uid
-      localStorage.setItem('token', authData.credential.accessToken)
-    }
-    // login with token
-    else {
-      uid = authData.uid
-      localStorage.setItem('token', authData.v)
-    }
-
-    const storeRef = this.fireBaseRootRef.child(this.props.params.storeId)
-    storeRef.on('value', (snapshot) => {
-      let data = snapshot.val() || {}
-      if (!data.owner) {
-        storeRef.set({
-          owner: uid
-        })
-      }
-
-      this.setState({ 
-        uid: uid,
-        owner: data.owner || uid
-      })
-    })
-  }
-
   logout() {
-    console.log('loggin out')
     Firebase.auth().signOut()
-      .then(() => { 
-        localStorage.removeItem('token')
-        this.setState({
-          uid: null
-        })
-      })
   }
 }

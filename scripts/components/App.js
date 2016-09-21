@@ -9,7 +9,7 @@ import Inventory from './app/Inventory'
 import { samples } from '../sample-fishes'
 import Helpers from '../helpers'
 
-const base = Rebase.createClass(Helpers.getRebaseConfig())
+const rebase = Rebase.createClass(Helpers.getFirebaseConfig())
 
 @Autobind
 export default class App extends React.Component {
@@ -24,7 +24,7 @@ export default class App extends React.Component {
   /* Lifecycle methods */
 
   componentDidMount() {
-    base.syncState(`${this.props.params.storeId}/fishes`, {
+    rebase.syncState(`${this.props.params.storeId}/fishes`, {
       context: this,
       state: 'fishes' 
     })
@@ -67,7 +67,7 @@ export default class App extends React.Component {
           removeFish={this.removeFish} 
           loadSamples={this.loadSamples} 
           fishes={this.state.fishes} 
-          updateState={this.updateState}
+          updateFishesState={this.updateFishesState}
           {...this.props} />
       </div>
     )
@@ -119,7 +119,7 @@ export default class App extends React.Component {
     }) 
   }
 
-  updateState(props) {
-    this.setState(props)
+  updateFishesState(fishes) {
+    this.setState({ fishes })
   }
 }

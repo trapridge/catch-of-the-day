@@ -39,7 +39,7 @@ export default class Helpers {
     ].join('-')
   }
 
-  static getRebaseConfig() {
+  static getFirebaseConfig() {
     return {
       apiKey: 'AIzaSyAP1s9hYKefytL01shHNegEbrB4bO59nJQ',
       authDomain: 'catch-of-the-day-18f2e.firebaseapp.com',
